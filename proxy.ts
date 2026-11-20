@@ -4,7 +4,7 @@ import { getSessionFromRequest } from "@/lib/session";
 
 const PUBLIC_PATHS = ["/login", "/api/health", "/robots.txt"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith("/_next"))) {
     return NextResponse.next();
