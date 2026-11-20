@@ -1,0 +1,41 @@
+to,subject,body,attachment_file
+ap@orbis-demo.example,Invoice MS-10231 from Meridian Stationery Co,"Hello AP team,
+
+Please find attached invoice MS-10231 for payment processing.
+
+Thank you,
+Meridian Stationery Co",invoices/MS-10231.pdf
+ap@orbis-demo.example,Invoice BL-7782 from Brightway Logistics,"Hello AP team,
+
+Please find attached invoice BL-7782 for payment processing.
+
+Thank you,
+Brightway Logistics",invoices/BL-7782.pdf
+ap@orbis-demo.example,Invoice CP-5519 from Cobalt Packaging Ltd,"Hello AP team,
+
+Please find attached invoice CP-5519 for payment processing.
+
+Thank you,
+Cobalt Packaging Ltd",invoices/CP-5519.pdf
+ap@orbis-demo.example,Invoice DP-3305 from Deltaform Parts,"Hello AP team,
+
+Attached is invoice DP-3305. Please remit payment to our new bank account ending 9937.
+
+Deltaform Parts",invoices/DP-3305.pdf
+ap@orbis-demo.example,Invoice FH-9004 from Fulcrum Hardware Supply,"Hello AP team,
+
+Please find attached invoice FH-9004 for payment processing.
+
+Thank you,
+Fulcrum Hardware Supply",invoices/FH-9004.pdf
+ap@orbis-demo.example,Invoice EF-2210 from Evergreen Facility Services,"Hello AP team,
+
+Attached is invoice EF-2210 for last month's cleaning. No PO on file — please advise.
+
+Evergreen Facility Services",invoices/EF-2210.pdf
+ap@orbis-demo.example,Invoice TR-1000 from Meridian Stationery Co,"Hello AP team,
+
+Please find attached invoice TR-1000 for payment processing.
+
+Thank you,
+Meridian Stationery Co",invoices/training-invoice.pdf

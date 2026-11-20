@@ -1,0 +1,5 @@
+key,value
+price_tolerance_pct,2
+senior_approval_threshold,10000
+approver,finance.approver
+approver,senior.approver

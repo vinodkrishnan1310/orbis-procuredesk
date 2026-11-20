@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Orbis ProcureDesk
 
-## Getting Started
+Fictional legacy-style procurement and accounts-payable portal for AI browser-agent demos. Business data is available only through server-rendered HTML forms—no business JSON API (except health and admin reset).
 
-First, run the development server:
+## Assumptions
+
+- Node 20+ and npm.
+- Postgres is hosted on [Neon](https://neon.tech); connection string in `DATABASE_URL`.
+- Demo passwords live only in environment variables (see `.env.example`).
+- Currency is USD; amounts render like `1,234.50`.
+- Sessions last 8 hours (`SESSION_SECRET`, `jose` HMAC cookie).
+- Vercel Hobby deployment: no writable filesystem at runtime; reset reseeds via Postgres only.
+- `lib/seed.ts` is the single source for deterministic seed data; `lib/seed-data.ts` shares constants with PDF generation.
+
+## Local setup
 
 ```bash
+cp .env.example .env.local
+# Set DATABASE_URL, SESSION_SECRET, CLERK_PASSWORD, APPROVER_PASSWORD, SENIOR_PASSWORD, RESET_SECRET
+
+npm install
+npm run db:reset
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/login](http://localhost:3000/login). Demo users: `ap.clerk`, `finance.approver`, `senior.approver` (passwords from env).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Neon Postgres connection string |
+| `SESSION_SECRET` | HMAC secret for session JWT cookie |
+| `CLERK_PASSWORD` | Password for `ap.clerk` |
+| `APPROVER_PASSWORD` | Password for `finance.approver` |
+| `SENIOR_PASSWORD` | Password for `senior.approver` |
+| `RESET_SECRET` | Header secret for `POST /api/admin/reset` |
 
-## Learn More
+## Deploying to Vercel Hobby + Neon
 
-To learn more about Next.js, take a look at the following resources:
+1. Push this repo and import the project in Vercel.
+2. Add **Neon Postgres** from the Vercel Marketplace and attach `DATABASE_URL` to the project.
+3. Set all variables from `.env.example` in Vercel project settings.
+4. Deploy, then run migrations against production once: `DATABASE_URL=... npm run db:reset` from your machine (or use Neon SQL console with `db/schema.sql` and call the reset endpoint).
+5. Open **Settings → Deployment Protection** in Vercel and confirm the production URL loads in a private browser window **without** a Vercel login gate (required for the demo).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Reset between demo runs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+curl -X POST "https://YOUR-PORTAL.example/api/admin/reset" \
+  -H "x-reset-secret: YOUR_RESET_SECRET"
+```
 
-## Deploy on Vercel
+Returns `{"ok":true}` and restores the seeded database state.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Generate demo assets
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run generate:invoices
+```
+
+Writes PDFs under `demo-assets/invoices/`, plus `emails.csv`, `policy.csv`, `bot-instructions.md`, and `slack-templates.md` (the Grok setup guide is maintained at `demo-assets/grok-bot-setup-guide.md`).
+
+## Grok Bot setup
+
+See [demo-assets/grok-bot-setup-guide.md](demo-assets/grok-bot-setup-guide.md).
+
+## Six demo invoice cases
+
+| Invoice | Intended match-check / workflow outcome |
+| --- | --- |
+| MS-10231 | Clean match; payment request prepared |
+| BL-7782 | Unit price ~10% over PO → exception |
+| CP-5519 | Duplicate of paid seed invoice → stop |
+| DP-3305 | Amounts match; bank-change email → escalate |
+| FH-9004 | Match; total above senior threshold |
+| EF-2210 | No PO; two ambiguous Evergreen POs → ask requester |
+
+## Scripts
+
+- `npm run db:migrate` — apply `db/schema.sql`
+- `npm run db:seed` — truncate and seed
+- `npm run db:reset` — migrate + seed
+- `npm run test` — Vitest (match-check logic)
+- `npm run lint` / `npm run typecheck` / `npm run build`
+
+## Pre-demo checklist
+
+- [ ] Production URL loads without Vercel login (Deployment Protection).
+- [ ] `ap.clerk` login works; failed login appears in audit log.
+- [ ] Reset endpoint returns 401 without secret, `{"ok":true}` with secret.
+- [ ] All six cases entered via `/invoices/new` show expected Match check results.
